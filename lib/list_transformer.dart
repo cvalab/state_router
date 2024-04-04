@@ -1,7 +1,9 @@
 import 'package:state_router/strategy_builder/strategy.dart';
 
 class ListTransformer<K, T> {
-  ListTransformer({this.sourceList = const [], this.mapRule = const []});
+  ListTransformer({this.sourceList = const [], this.mapRule = const []}){
+    _init();
+  }
 
   final List<MapRule>? mapRule;
 
