@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key, required this.title});
@@ -7,12 +7,18 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(title),
-        const SizedBox(height: 20),
-        const Text('About Page')
-      ],
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Column(
+        children: [
+          Text(title),
+          const SizedBox(height: 20),
+          const Text('About Page')
+        ],
+      ),
     );
   }
 }

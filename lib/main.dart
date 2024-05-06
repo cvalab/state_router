@@ -1,16 +1,56 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:state_router/state_router.dart';
+import 'package:state_router/pages/about_page.dart';
+import 'package:state_router/pages/splash_screen.dart';
+import 'package:state_router/transformer/state_router.dart';
+
+import 'observer/avigation_history_observer.dart';
 
 void main() {
-  runApp( MyApp());
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-   MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   GlobalKey<NavigatorState>? get navigatorKey => GlobalKey<NavigatorState>();
+
   final StateRouter router = StateRouter();
 
-  final Object state= Object();
+  List<Page> pages = [
+    const MaterialPage(child: SplashScreen(), name: 'splash12')
+  ];
+
+  final Object state = Object();
+
+  final navigationHistoryObserver = NavigationHistoryObserver();
+
+  @override
+  void initState() {
+    navigationHistoryObserver.historyChangeStream.listen((event) {
+      if (kDebugMode) {
+        String? name = (event as HistoryChange).newRoute?.settings.name;
+        print('History changed name=> $name');
+        print('History changed=> $event');
+      }
+    });
+
+    pages = [
+      ...pages,
+      ...[
+        const MaterialPage(
+            name: 'home12',
+            child: MyHomePage(title: 'Flutter Demo Home Page')),
+      ],
+    ];
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,26 +59,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:  Navigator(
-        key: navigatorKey,
-        pages: router.getPages(state),
-        onPopPage: (route, result) => route.didPop(result)
-    ),
+      home: Navigator(
+          //key: navigatorKey,
+          pages: pages,
+          observers: [navigationHistoryObserver],
+          onPopPage: (route, result) => route.didPop(result)),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -51,50 +82,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
@@ -108,7 +108,17 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+                settings: const RouteSettings(name: "aboutPage12"),
+                builder: (BuildContext context) {
+                  return const AboutPage(
+                    title: 'title',
+                  );
+                }),
+          );
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

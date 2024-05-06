@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:state_router/pages/default_page.dart';
-import 'package:state_router/states/about_state.dart';
-import 'package:state_router/strategy_builder/strategy.dart';
+import 'package:state_router/states/app_states.dart';
+import 'package:state_router/transformer/strategy_builder/strategy.dart';
 
-import 'pages/about_page.dart';
+import '../observer/custom_navigator_observer.dart';
+import '../pages/about_page.dart';
 
 class StateRouter {
+  get observer => CustomNavigatorObserver();
+
   Route routeBuilder(Object state) {
     if (state is AboutState) {
       return Route(
@@ -38,7 +41,7 @@ class StateRouter {
     routes.removeLast();
   }
 
-  List<Page<dynamic>> getPages(Object state) {
+  List<Page<dynamic>> getPages() {
     return routes.map((e) => MaterialPage(child: e.widget)).toList();
   }
 }

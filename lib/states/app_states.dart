@@ -1,4 +1,3 @@
-import '../stack_transformer.dart';
 
 sealed class AppState with ChildState {
 }
@@ -50,10 +49,10 @@ mixin ChildState {
 }
 
 void main() {
-  final stack = StackTransformer();
+  /*final stack = StackTransformer();
   //final about= AboutState('About')..addChild(child);
   stack.push(HomeState(name: 'Home'));
   stack.push(AboutState('About'));
   stack.push(SettingState());
-  print(stack.stack);
+  print(stack.stack);*/
 }

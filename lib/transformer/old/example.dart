@@ -1,4 +1,5 @@
-import 'package:state_router/strategy_builder/strategy.dart';
+
+import 'package:state_router/transformer/strategy_builder/strategy.dart';
 
 class Example{
 
