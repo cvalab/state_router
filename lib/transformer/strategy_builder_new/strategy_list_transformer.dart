@@ -1,28 +1,26 @@
+import 'package:state_router/transformer/strategy_builder_new/strategy.dart';
 
+import 'list_transformer_new.dart';
 
-import 'package:state_router/transformer/strategy_builder/strategy.dart';
+class StrategyListTransformer<S> implements ListTransformer<S> {
+  bool Function(S a, S b) findStrategy;
 
-import '../list_transformer.dart';
-
-class StrategyListTransformer<S, R> implements ListTransformer<S, R> {
   StrategyListTransformer(
-      {this.sourceList = const [], this.mapRule = const []}) {
+      {this.sourceList = const [],
+      this.mapRule = const [],
+      required bool Function(dynamic a, dynamic b) this.findStrategy}) {
     _init();
   }
 
-  final List<MapRule<S, R>>? mapRule;
+  final List<TransformRule<S>>? mapRule;
 
-  Map<Type, R Function(S)>? objectMaper;
-
-  //Map<Type, Object Function(Object)>? objectMaper;
-
-  Map<Type, Strategy<R>>? _strategyMap;
+  Map<Type, Strategy<S>>? _strategyMap;
 
   //App State
   final List<S> sourceList;
 
   //Route State
-  List<R> _resultList = [];
+  List<S> _resultList = [];
 
   void _init() {
     if (_strategyMap == null) {
@@ -31,18 +29,11 @@ class StrategyListTransformer<S, R> implements ListTransformer<S, R> {
         _strategyMap![element.type] = element.strategy;
       }
     }
-    if (objectMaper == null) {
-      objectMaper = {};
-      for (var element in mapRule!) {
-        objectMaper![element.type] = element.mapFunction!;
-      }
-    }
   }
 
-  List<R> push(S value) {
+  List<S> push(S value) {
     print("+${value.runtimeType}");
-    final R Function(S)? mapFunction = objectMaper?[value.runtimeType];
-    final R? resObj = mapFunction != null ? mapFunction(value) : null;
+    final S? resObj = value;
 
     final strategy = _strategyMap?[value.runtimeType];
     //List<R> result = [];
@@ -54,19 +45,21 @@ class StrategyListTransformer<S, R> implements ListTransformer<S, R> {
     return _resultList;
   }
 
-  List<R> pop() {
+  @override
+  List<S> pop() {
     _resultList.removeLast();
     notifyListeners();
     return _resultList;
   }
 
-  List<R> get() {
+  @override
+  List<S> get() {
     return _resultList;
   }
 
-  final List<Function(List<R>)> _stackListener = [];
+  final List<Function(List<S>)> _stackListener = [];
 
-  void addStackLister(Function(List<R>) listener) {
+  void addStackLister(Function(List<S>) listener) {
     _stackListener.add(listener);
   }
 
@@ -77,10 +70,12 @@ class StrategyListTransformer<S, R> implements ListTransformer<S, R> {
   }
 }
 
-class MapRule<S, R> {
-  MapRule({required this.type, required this.strategy, this.mapFunction});
+class TransformRule<S> {
+  bool Function(S a, S b) onCompare;
+
+  TransformRule(
+      {required this.type, required this.strategy, required this.onCompare});
 
   final Type type;
-  final Strategy<R> strategy;
-  final R Function(S)? mapFunction;
+  final Strategy<S> strategy;
 }

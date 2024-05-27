@@ -1,22 +1,37 @@
-import 'package:state_router/states/app_states.dart';
-import 'package:state_router/states/result.dart';
-import 'package:state_router/transformer/strategy_builder/strategy.dart';
-import 'package:state_router/transformer/strategy_builder/strategy_list_transformer.dart';
+import 'package:state_router/transformer/strategy_builder_new/strategy.dart';
+import 'package:state_router/transformer/strategy_builder_new/strategy_list_transformer.dart';
+
+import '../../states/app_states.dart';
 
 void main() {
-  StrategyListTransformer strategyListTransformer =
-      StrategyListTransformer(mapRule: [
-    MapRule(
-      type: HomeState,
-      strategy: const Standard(),
-      mapFunction: (e) => HomeRoute(), name: 'Home',
-    ),
-    MapRule(
-      type: AboutState,
-      strategy: const SingleTask(),
-      mapFunction: (e) => AboutRoute('About'), name: 'About',
-    )
-  ]);
+  StrategyListTransformer<AppState> strategyListTransformer =
+      StrategyListTransformer(
+          mapRule: [
+        TransformRule(
+            type: HomeState,
+            strategy: const Standard(),
+            onCompare: (a, b) {
+              if (identical(a, b)) {
+                return true;
+              }
+              return false;
+            }
+            //name: 'Home',
+            ),
+        TransformRule(
+            type: AboutState,
+            strategy: const SingleTask(),
+            onCompare: (a, b) {
+              if (identical(a, b)) {
+                return true;
+              }
+              return false;
+            } //name: 'About',
+            )
+      ],
+          findStrategy: (a, b) {
+            return (identical(a, b));
+          });
 
   strategyListTransformer.addStackLister((p0) => print(p0));
 

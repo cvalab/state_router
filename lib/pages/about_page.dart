@@ -19,6 +19,29 @@ class AboutPage extends StatelessWidget {
           const Text('About Page')
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+
+          showDialog(context: context, builder: (context) {
+            return AlertDialog(
+              title: const Text('Settings'),
+              content: const Text('Coming soon...'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.maybePop(context),
+                  child: const Text('Close'),
+                ),
+              ],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            );
+          });
+
+        },
+        tooltip: 'Decrement',
+        child: const Icon(Icons.remove),
+      )
     );
   }
 }

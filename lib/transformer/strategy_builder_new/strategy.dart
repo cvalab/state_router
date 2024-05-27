@@ -11,11 +11,11 @@ abstract class Strategy<R> {
 // A -> B -> C -> D
 // +B
 // A -> B -> C -> D -> B
-class Standard<R> implements Strategy {
+class Standard<R> implements Strategy<R> {
   const Standard();
 
   @override
-  List routeBuilder({required List routes, required route}) {
+  List<R> routeBuilder({required List routes, required route}) {
     final List<R> res = [...routes, route];
     return res;
   }
@@ -39,11 +39,11 @@ class SingleTop implements Strategy {
   }
 }
 
-class SingleTask implements Strategy {
+class SingleTask<R> implements Strategy<R> {
   const SingleTask();
 
   @override
-  List routeBuilder({required List routes, required route}) {
+  List<R> routeBuilder({required List <R> routes, required R route}) {
     int index = routes.indexOf(route);
     if (index != -1) {
       return routes.sublist(0, index + 1);
@@ -66,7 +66,7 @@ class SingleInstance implements Strategy {
   }
 }
 
-class SingleInstancePerTask implements Strategy {
+class SingleInstancePerTask<R> implements Strategy {
   const SingleInstancePerTask();
 
   @override

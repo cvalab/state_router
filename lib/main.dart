@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:state_router/pages/about_page.dart';
 import 'package:state_router/pages/splash_screen.dart';
-import 'package:state_router/transformer/state_router.dart';
 
+import 'app_state_repository/api_state_repository.dart';
+import 'app_state_repository/app_state.dart';
 import 'observer/avigation_history_observer.dart';
 
 void main() {
@@ -20,13 +21,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   GlobalKey<NavigatorState>? get navigatorKey => GlobalKey<NavigatorState>();
 
-  final StateRouter router = StateRouter();
-
   List<Page> pages = [
-    const MaterialPage(child: SplashScreen(), name: 'splash12')
+    const MaterialPage(
+        key: ValueKey('splash12'), child: SplashScreen(), name: 'splash12')
   ];
-
-  final Object state = Object();
 
   final navigationHistoryObserver = NavigationHistoryObserver();
 
@@ -37,6 +35,7 @@ class _MyAppState extends State<MyApp> {
         String? name = (event as HistoryChange).newRoute?.settings.name;
         print('History changed name=> $name');
         print('History changed=> $event');
+        print('pages=> ${pages.length}');
       }
     });
 
@@ -44,15 +43,33 @@ class _MyAppState extends State<MyApp> {
       ...pages,
       ...[
         const MaterialPage(
+            key: ValueKey('home12'),
             name: 'home12',
             child: MyHomePage(title: 'Flutter Demo Home Page')),
       ],
     ];
+
+    AppStateRepository().appStateStreamSt.listen((event) {
+      print(' state event=> $event');
+      if (event is AboutPageSt) {
+        print(' state event2=> $event');
+
+        pages.add(const MaterialPage(
+            key: ValueKey('aboutPage12'),
+            name: 'aboutPage12',
+            child: AboutPage(title: 'title')));
+        print(pages.length);
+
+        setState(() {});
+      }
+    });
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print('rebuild');
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -60,10 +77,21 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: Navigator(
-          //key: navigatorKey,
+          key: navigatorKey,
           pages: pages,
           observers: [navigationHistoryObserver],
-          onPopPage: (route, result) => route.didPop(result)),
+          onPopPage: (route, result) {
+            print(pages.length);
+
+            final isDidPop = route.didPop(result);
+            if (isDidPop) {
+              pages.remove(route.settings);
+              setState(() {});
+            }
+            print(pages.length);
+
+            return isDidPop;
+          }),
     );
   }
 }
@@ -79,12 +107,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,20 +129,78 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-                settings: const RouteSettings(name: "aboutPage12"),
-                builder: (BuildContext context) {
-                  return const AboutPage(
-                    title: 'title',
-                  );
-                }),
-          );
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    settings: const RouteSettings(name: "aboutPage12"),
+                    builder: (BuildContext context) {
+                      return const AboutPage(
+                        title: 'title',
+                      );
+                    }),
+              );
+            },
+            tooltip: 'Increment',
+            child: const Icon(Icons.add),
+          ),
+          const Divider(
+            height: 24,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                  useRootNavigator: false,
+                  routeSettings: const RouteSettings(name: "Dialog12"),
+                  context: context,
+                  builder: (_) => AlertDialog(
+                        title: const Text('Dialog Title'),
+                        content: Column(
+                          children: [
+                            Text('This is my content'),
+                            Divider(
+                              height: 24,
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      settings: const RouteSettings(
+                                          name: "aboutPage12"),
+                                      builder: (BuildContext context) {
+                                        return const AboutPage(
+                                          title: 'About Page',
+                                        );
+                                      }),
+                                );
+                              },
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      ));
+            },
+            tooltip: 'Increment',
+            child: const Icon(Icons.message),
+          ),
+          const Divider(
+            height: 24,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              AppStateRepository().updateAppState(AboutPageSt());
+
+              /*        pages.add(const MaterialPage(
+                  name: 'aboutPage12', child: AboutPage(title: 'title')));
+            */
+            },
+            tooltip: 'Increment',
+            child: const Icon(Icons.plus_one),
+          ),
+        ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
